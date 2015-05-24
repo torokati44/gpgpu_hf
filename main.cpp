@@ -12,14 +12,19 @@ const int height = 900;
 
 CLWrapper cl;
 
-
-void simulationStep(float dt) {
-
-}
+#define TIME( call ) \
+    { \
+        int ticks1 = SDL_GetTicks();\
+        call; \
+        int ticks2 = SDL_GetTicks();\
+        std::cout << #call << " " << (ticks2 - ticks1) << " ms\n"; \
+    }
 
 int main() {
 
-    SpringyObject s("objects/gridcube_16.obj");
+    std::vector<AbstractObject *> objects;
+
+    objects.push_back(new SpringyObject("objects/gridcube_16.obj"));
 
 
     SDL_Init(SDL_INIT_VIDEO);
@@ -49,7 +54,7 @@ int main() {
             }
         }
 
-        float dt = 0.001;
+        float dt = 0.01;
 
         const Uint8 *state = SDL_GetKeyboardState(NULL);
 
@@ -65,18 +70,37 @@ int main() {
         if (state[SDL_SCANCODE_DOWN]) { cam.down(dt); }
         if (state[SDL_SCANCODE_RIGHT]) { cam.right(dt); }
 
+        int x, y;
+        int buttonstate = SDL_GetRelativeMouseState(&x, &y);
+        if (buttonstate & 1) {
+            cam.right(x / 100.0 * dt);
+            cam.down(y / 100.0 * dt);
+        }
+
+        if (buttonstate & 4) {
+            cam.move_left(x / 100.0 * dt);
+            cam.move_up(y / 100.0 * dt);
+        }
+
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
         cam.look();
-        s.step(dt);
-        s.render();
+
+        for (auto &o : objects) {
+            for (int i = 0; i < 10; ++i) {
+                TIME( o->step(dt / 10) ) ;
+            }
+            TIME ( o->render() ) ;
+        }
 
 
         SDL_RenderPresent(renderer);
-        SDL_Delay(1);
+        SDL_Delay(10);
     }
 
-
+    for (auto &o : objects) {
+        delete o;
+    }
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();

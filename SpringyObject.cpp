@@ -85,12 +85,27 @@ void SpringyObject::render() {
     auto positions = positionBuffer.map();
 
     glPointSize(3);
+
+
+    glColor4f(1,1,1,1);
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(3, GL_FLOAT, 16, positions);
+
+    glDrawArrays(GL_POINTS, 0, obj.points.size());
+
+    glDisableClientState(GL_VERTEX_ARRAY);
+
+
+/*
     glBegin(GL_POINTS);
     glColor4f(1,1,1,1);
     for (int i = 0; i < obj.points.size(); ++i) {
         glVertex3fv(positions[i].s);
     }
     glEnd();
+*/
+
+
 
     glBegin(GL_LINES);
     glColor3f(0.8, 0.4, 0.2);

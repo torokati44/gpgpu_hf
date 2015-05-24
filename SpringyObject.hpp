@@ -7,8 +7,9 @@
 #include "CLBuffer.hpp"
 #include "CLKernel.hpp"
 #include "ObjLoader.hpp"
+#include "AbstractObject.hpp"
 
-class SpringyObject {
+class SpringyObject : public AbstractObject {
     ObjLoader obj;
 
     int maxDegree = 64;

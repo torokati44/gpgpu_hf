@@ -42,29 +42,29 @@ void Camera::down(float dt) {
 
 
 void Camera::move_left(float dt) {
-    x += 0.1 * sinf(theta);
-    y -= 0.1 * cosf(theta);
+    x += 10 * sinf(theta) * dt;
+    y -= 10 * cosf(theta) * dt;
 }
 
 void Camera::move_right(float dt) {
-    x -= 0.1 * sinf(theta);
-    y += 0.1 * cosf(theta);
+    x -= 10 * sinf(theta) * dt;
+    y += 10 * cosf(theta) * dt;
 }
 
 void Camera::move_forward(float dt) {
-    x -= 0.1 * cosf(theta);
-    y -= 0.1 * sinf(theta);
+    x -= 10 * cosf(theta) * dt;
+    y -= 10 * sinf(theta) * dt;
 }
 
 void Camera::move_backward(float dt) {
-    x += 0.1 * cosf(theta);
-    y += 0.1 * sinf(theta);
+    x += 10 * cosf(theta) * dt;
+    y += 10 * sinf(theta) * dt;
 }
 
 void Camera::move_up(float dt) {
-    z += 0.1;
+    z += 10 * dt;
 }
 
 void Camera::move_down(float dt) {
-    z -= 0.1;
+    z -= 10 * dt;
 }
