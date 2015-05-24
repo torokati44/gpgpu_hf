@@ -10,6 +10,7 @@ class AbstractObject {
 public:
     virtual void step(float dt) = 0;
     virtual void render() = 0;
+    virtual ~AbstractObject() {};
 };
 
 

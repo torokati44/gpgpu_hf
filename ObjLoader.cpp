@@ -15,29 +15,37 @@ ObjLoader::ObjLoader(std::string filename) {
 
         if (!line.empty()) {
             std::stringstream ss(line);
-            char type;
+            std::string type;
             ss >> type;
-            switch (type) {
-                case '#':
-                    continue;
-                case 'v':
-                    float x, y, z;
-                    ss >> x >> y >> z;
-                    points.push_back((cl_float4){x, y, z, 0.0f});
-                    break;
-                case 'l':
-                    int a, b;
-                    ss >> a >> b;
-                    edges.push_back((cl_int2){a - 1, b - 1});
-                    break;
-                default:
-                    std::cerr << "Unknown line type: '" << type << "'";
-                    break;
+            if (type == "#") {
+                continue;
+            } else if (type == "v") {
+                float x, y, z;
+                ss >> x >> y >> z;
+                points.push_back((cl_float4) {x, y, z, 0.0f});
+            } else if (type == "vn") {
+                float x, y, z;
+                ss >> x >> y >> z;
+                normals.push_back((cl_float4) {x, y, z, 0.0f});
+            } else if (type == "l") {
+                int a, b;
+                ss >> a >> b;
+                edges.push_back((cl_int2) {a - 1, b - 1});
+            } else if (type == "f") {
+                int a, b, c;
+                ss >> a >> b >> c;
+                faces.push_back((cl_int4) {a - 1, b - 1, c - 1, 0});
+            } else {
+                std::cerr << "Unknown line type: '" << type << "'";
             }
         }
     }
 
-    std::cout << "Loaded " << points.size() << " points and " << edges.size() << " edges from " << filename << std::endl;
+    std::cout << "Loaded " <<
+            points.size() << " points, " <<
+            edges.size() << " edges and " <<
+            faces.size() << " faces " <<
+            "from " << filename << std::endl;
 }
 
 void ObjLoader::connect_neighbors(float mindist, float maxdist) {

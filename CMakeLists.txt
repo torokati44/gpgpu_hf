@@ -12,6 +12,6 @@ set(SOURCE_FILES
     ObjLoader.hpp
     ObjLoader.cpp)
 
-add_executable(gpgpu_hf ${SOURCE_FILES} CLBuffer.hpp CLKernel.hpp SpringyObject.cpp SpringyObject.hpp Camera.cpp Camera.hpp AbstractObject.hpp)
+add_executable(gpgpu_hf ${SOURCE_FILES} CLBuffer.hpp CLKernel.hpp SpringyObject.cpp SpringyObject.hpp Camera.cpp Camera.hpp AbstractObject.hpp VolumeMesh.cpp VolumeMesh.hpp)
 
 target_link_libraries (gpgpu_hf OpenCL SDL2 GL GLU)

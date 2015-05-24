@@ -6,6 +6,7 @@
 #include "CLKernel.hpp"
 #include "SpringyObject.hpp"
 #include "Camera.hpp"
+#include "VolumeMesh.hpp"
 
 const int width = 1600;
 const int height = 900;
@@ -20,11 +21,28 @@ CLWrapper cl;
         std::cout << #call << " " << (ticks2 - ticks1) << " ms\n"; \
     }
 
-int main() {
 
-    std::vector<AbstractObject *> objects;
+std::vector<AbstractObject *> objects;
+
+void clear() {
+    for (auto &o : objects) {
+        delete o;
+    }
+    objects.clear();
+}
+
+void reset() {
+    clear();
 
     objects.push_back(new SpringyObject("objects/gridcube_16.obj"));
+    objects.push_back(new VolumeMesh("objects/sphere.obj"));
+}
+
+
+
+int main() {
+
+    reset();
 
 
     SDL_Init(SDL_INIT_VIDEO);
@@ -50,6 +68,11 @@ int main() {
             switch (event.type) {
                 case SDL_QUIT:
                     quit = true;
+                    break;
+                case SDL_KEYDOWN:
+                    if (event.key.keysym.scancode == SDL_SCANCODE_R) {
+                        reset();
+                    }
                     break;
             }
         }
@@ -98,9 +121,8 @@ int main() {
         SDL_Delay(10);
     }
 
-    for (auto &o : objects) {
-        delete o;
-    }
+    clear();
+
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();

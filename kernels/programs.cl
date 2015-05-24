@@ -46,18 +46,16 @@ __kernel void calcForces(int maxDegree,
 
         forceBuffer[point] = gravity;
 
-        for (int i = 0; i < maxDegree; ++i) {
+        for (int i = 0; i < degreeBuffer[point]; ++i) {
                 int other = pairBuffer[first + i];
 
-                if (other >= 0) {
-                    float dist = distance(positionBuffer[other], positionBuffer[point]);
+                float dist = distance(positionBuffer[other], positionBuffer[point]);
 
-                    if (dist < 1e-5f) continue;
+                if (dist < 1e-5f) continue;
 
-                    float4 to_other = (positionBuffer[other] - positionBuffer[point]) / dist;
+                float4 to_other = (positionBuffer[other] - positionBuffer[point]) / dist;
 
-                    forceBuffer[point] += to_other * pairParamBuffer[first + i].y * (dist - pairParamBuffer[first + i].x);
-                }
+                forceBuffer[point] += to_other * pairParamBuffer[first + i].y * (dist - pairParamBuffer[first + i].x);
         }
 }
 
@@ -84,5 +82,21 @@ __kernel void integrate2Euler(
         position_out[id].z = 0.0f;
         velocity_in[id] = (float4)(0, 0, 0, 0);
     }
-    velocity_in[id] *= 0.999;
+    velocity_in[id] *= 0.999f;
 }
+
+
+__kernel void calcVolumes(
+        __global float4 *positionBuffer,
+        __global int4 *faceBuffer,
+        __global float *volumeBuffer) {
+    int face = get_global_id(0);
+
+    volumeBuffer[face] = dot(
+            positionBuffer[faceBuffer[face].x],
+            cross(
+                    positionBuffer[faceBuffer[face].y],
+                    positionBuffer[faceBuffer[face].z])) / 6.0f;
+}
+
+
