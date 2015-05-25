@@ -23,15 +23,16 @@ class CLKernel {
         setParam(i + 1, tail...);
     }
 
-
+    std::string name;
 public:
 
-    CLKernel(const char *name) {
+    CLKernel(const char *name) : name{name} {
         kernel = CLWrapper::instance->createKernel(CLWrapper::instance->program(), name);
     }
 
 
     void execute(size_t size, paramTypes... params) {
+        //std::cout << "executing " << name << std::endl;
         setParam(0, params...);
         clEnqueueNDRangeKernel(CLWrapper::instance->cqueue(),kernel, 1, NULL, &size, NULL, 0, NULL, NULL);
     }

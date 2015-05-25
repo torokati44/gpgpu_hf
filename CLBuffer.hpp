@@ -28,7 +28,9 @@ public:
     }
 
     void unmap() {
-        clEnqueueUnmapMemObject(CLWrapper::instance->cqueue(), mem, mapped, 0, NULL, NULL);
+        if (mapped) {
+            clEnqueueUnmapMemObject(CLWrapper::instance->cqueue(), mem, mapped, 0, NULL, NULL);
+        }
         mapped = 0;
     }
 

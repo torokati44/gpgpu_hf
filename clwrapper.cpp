@@ -110,7 +110,7 @@ bool CLWrapper::fileToString(const char *path, char *&out, int &len) {
 cl_program CLWrapper::createProgram(const char *fileName) {
     char *programSource = NULL;
     int len = 0;
-    int errorFlag = -1;
+
     if (!fileToString(fileName, programSource, len)) {
         std::cerr << "Error loading program: " << fileName << std::endl;
         exit(EXIT_FAILURE);

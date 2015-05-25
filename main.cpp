@@ -34,7 +34,7 @@ void clear() {
 void reset() {
     clear();
 
-    objects.push_back(new SpringyObject("objects/gridcube_16.obj"));
+    //objects.push_back(new SpringyObject("objects/gridcube_16.obj"));
     objects.push_back(new VolumeMesh("objects/sphere.obj"));
 }
 

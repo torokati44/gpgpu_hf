@@ -16,6 +16,8 @@ class VolumeMesh : public AbstractObject {
     int maxDegree = 64;
     int maxCornered = 16;
 
+    float initVolume;
+
     CLBuffer<cl_float4> positionBuffer;
     CLBuffer<cl_float4> velocityBuffer;
     CLBuffer<cl_float> inverseMassBuffer;
@@ -34,11 +36,14 @@ class VolumeMesh : public AbstractObject {
 
     CLKernel<int, cl_mem, cl_mem, cl_mem, cl_mem, cl_mem> calcForcesKernel;
     CLKernel<cl_mem, cl_mem, cl_mem> calcVolumesKernel;
+    CLKernel<float, int, cl_mem, cl_mem, cl_mem, cl_mem> applyPressureKernel;
     CLKernel<float, cl_mem, cl_mem, cl_mem, cl_mem> integrate1EulerKernel;
     CLKernel<float, cl_mem, cl_mem, cl_mem> integrate2EulerKernel;
 
 public:
     VolumeMesh(const std::string &filename);
+
+    float getVolume();
 
     void step(float dt);
 

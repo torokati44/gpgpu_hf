@@ -18,27 +18,33 @@ VolumeMesh::VolumeMesh(const std::string &filename):
         volumeBuffer{obj.faces.size()},
         calcForcesKernel{"calcForces"},
         calcVolumesKernel{"calcVolumes"},
+        applyPressureKernel{"applyPressure"},
         integrate1EulerKernel{"integrate1Euler"},
         integrate2EulerKernel{"integrate2Euler"}
 {
     auto positions = positionBuffer.map();
     auto velocities = velocityBuffer.map();
     auto inverseMasses = inverseMassBuffer.map();
-    auto forces = forceBuffer.map();
     auto degrees = degreeBuffer.map();
     auto pairs = pairBuffer.map();
     auto pairParams = pairParamBuffer.map();
     auto cornereds = corneredBuffer.map();
+    auto otherCorners = otherCornerBuffer.map();
     auto faces = faceBuffer.map();
 
-    for (int i = 0; i < obj.points.size(); ++i) {
+    for (size_t i = 0; i < obj.points.size(); ++i) {
         positions[i] = obj.points[i];
-        velocities[i] = (cl_float4){0, 0, 0, 0};
-        inverseMasses[i] = 5;
+
+        velocities[i].s[0] = 0;
+        velocities[i].s[1] = 0;
+        velocities[i].s[2] = 0;
+        velocities[i].s[3] = 0;
+
+        inverseMasses[i] = 10;
         degrees[i] = 0;
     }
 
-    for (int i = 0; i < obj.edges.size(); ++i) {
+    for (size_t i = 0; i < obj.edges.size(); ++i) {
         int a = obj.edges[i].s[0];
         int b = obj.edges[i].s[1];
 
@@ -52,7 +58,7 @@ VolumeMesh::VolumeMesh(const std::string &filename):
         float dz = positions[a].s[2] - positions[b].s[2];
 
         float dist = sqrtf(dx*dx + dy*dy + dz*dz);
-        float strength = 2000;
+        float strength = 5000;
 
         pairs[maxDegree * a + degrees[a]] = b;
         pairs[maxDegree * b + degrees[b]] = a;
@@ -66,7 +72,7 @@ VolumeMesh::VolumeMesh(const std::string &filename):
         ++degrees[a];
         ++degrees[b];
     }
-/*
+
     for (int i = 0; i < obj.faces.size(); ++i) {
         int a = obj.faces[i].s[0];
         int b = obj.faces[i].s[1];
@@ -77,58 +83,67 @@ VolumeMesh::VolumeMesh(const std::string &filename):
             continue;
         }
 
-        faces[maxCornered * a + cornereds[a]].s[0] = b;
-        faces[maxCornered * a + cornereds[a]].s[1] = c;
+        otherCorners[maxCornered * a + cornereds[a]].s[0] = b;
+        otherCorners[maxCornered * a + cornereds[a]].s[1] = c;
 
-        faces[maxCornered * b + cornereds[b]].s[0] = c;
-        faces[maxCornered * b + cornereds[b]].s[1] = a;
+        otherCorners[maxCornered * b + cornereds[b]].s[0] = c;
+        otherCorners[maxCornered * b + cornereds[b]].s[1] = a;
 
-        faces[maxCornered * c + cornereds[c]].s[0] = a;
-        faces[maxCornered * c + cornereds[c]].s[1] = b;
+        otherCorners[maxCornered * c + cornereds[c]].s[0] = a;
+        otherCorners[maxCornered * c + cornereds[c]].s[1] = b;
 
 
         ++cornereds[a];
         ++cornereds[b];
         ++cornereds[c];
     }
-    */
 
-    for (int i = 0; i < obj.faces.size(); ++i) {
+
+    for (size_t i = 0; i < obj.faces.size(); ++i) {
         faces[i] = obj.faces[i];
     }
 
     positionBuffer.unmap();
     velocityBuffer.unmap();
     inverseMassBuffer.unmap();
-    forceBuffer.unmap();
     degreeBuffer.unmap();
     pairBuffer.unmap();
     pairParamBuffer.unmap();
-    otherCornerBuffer.unmap();
     corneredBuffer.unmap();
+    otherCornerBuffer.unmap();
+    faceBuffer.unmap();
 
+    initVolume = getVolume();
+}
+
+void VolumeMesh::step(float dt) {
+    float volumeNow = getVolume();
+
+    std::cout << "volume is " << volumeNow << " now, but was " << initVolume << std::endl;
+
+    calcForcesKernel.execute(obj.points.size(), maxDegree, positionBuffer, degreeBuffer, pairBuffer, pairParamBuffer, forceBuffer);
+
+    applyPressureKernel.execute(obj.points.size(), initVolume - volumeNow, maxCornered, positionBuffer, corneredBuffer, otherCornerBuffer, forceBuffer);
+
+    integrate1EulerKernel.execute(obj.points.size(), dt, inverseMassBuffer, velocityBuffer, forceBuffer, velocityBuffer);
+
+    integrate2EulerKernel.execute(obj.points.size(), dt, positionBuffer, velocityBuffer, positionBuffer);
+}
+
+float VolumeMesh::getVolume() {
     calcVolumesKernel.execute(obj.faces.size(), positionBuffer, faceBuffer, volumeBuffer);
 
     auto volumes = volumeBuffer.map();
 
     float sum = 0;
 
-    for (int i = 0 ; i < obj.faces.size(); ++i) {
+    for (size_t i = 0 ; i < obj.faces.size(); ++i) {
         sum += volumes[i];
     }
 
-    std::cout << "Volume of " << filename << " is " << sum << std::endl;
-
     volumeBuffer.unmap();
-}
 
-void VolumeMesh::step(float dt) {
-    calcForcesKernel.execute(obj.points.size(), maxDegree, positionBuffer, degreeBuffer, pairBuffer, pairParamBuffer, forceBuffer);
-
-    integrate1EulerKernel.execute(obj.points.size(), dt, inverseMassBuffer, velocityBuffer, forceBuffer, velocityBuffer);
-
-    integrate2EulerKernel.execute(obj.points.size(), dt, positionBuffer, velocityBuffer, positionBuffer);
-
+    return sum;
 }
 
 void VolumeMesh::render() {

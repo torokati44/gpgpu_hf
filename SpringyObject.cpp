@@ -19,19 +19,23 @@ SpringyObject::SpringyObject(const std::string &filename):
     auto positions = positionBuffer.map();
     auto velocities = velocityBuffer.map();
     auto inverseMasses = inverseMassBuffer.map();
-    auto forces = forceBuffer.map();
     auto degrees = degreeBuffer.map();
     auto pairs = pairBuffer.map();
     auto pairParams = pairParamBuffer.map();
 
-    for (int i = 0; i < obj.points.size(); ++i) {
+    for (size_t i = 0; i < obj.points.size(); ++i) {
         positions[i] = obj.points[i];
-        velocities[i] = (cl_float4){0, 0, 0, 0};
+
+        velocities[i].s[0] = 0;
+        velocities[i].s[1] = 0;
+        velocities[i].s[2] = 0;
+        velocities[i].s[3] = 0;
+
         inverseMasses[i] = 5;
         degrees[i] = 0;
     }
 
-    for (int i = 0; i < obj.edges.size(); ++i) {
+    for (size_t i = 0; i < obj.edges.size(); ++i) {
         int a = obj.edges[i].s[0];
         int b = obj.edges[i].s[1];
 
@@ -59,14 +63,11 @@ SpringyObject::SpringyObject(const std::string &filename):
         ++degrees[a];
         ++degrees[b];
 
-
-
     }
 
     positionBuffer.unmap();
     velocityBuffer.unmap();
     inverseMassBuffer.unmap();
-    forceBuffer.unmap();
     degreeBuffer.unmap();
     pairBuffer.unmap();
     pairParamBuffer.unmap();
