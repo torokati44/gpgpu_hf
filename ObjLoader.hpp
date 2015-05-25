@@ -19,6 +19,9 @@ public:
     std::vector<cl_int4> faces;
 
     void connect_neighbors(float mindist, float maxdist);
+    void connect_neighbors();
+    void connect_opposites();
+    void add_faces_as_edges();
 };
 
 

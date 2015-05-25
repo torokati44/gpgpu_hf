@@ -90,7 +90,7 @@ __kernel void applyPressure(float pressureDiff, int maxCornered,
         float4 c = positionBuffer[other2];
 
         float4 cp = cross(b-a, c-a);
-        forceBuffer[point] += cp * pressureDiff * 1000;
+        forceBuffer[point] += cp * pressureDiff * 20000;
         normal += normalize(cp);
     }
 

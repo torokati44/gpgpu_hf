@@ -31,19 +31,25 @@ void clear() {
     objects.clear();
 }
 
-void spawnTorus() {
-    auto t = new VolumeMesh("objects/torus.obj");
+void spawnVolume(std::string name) {
+    auto t = new VolumeMesh(name);
     objects.push_back(t);
 }
 
-/*
-void reset() {
-    clear();
-
-    //objects.push_back(new SpringyObject("objects/gridcube_16.obj"));
-    objects.push_back(new VolumeMesh("objects/torus.obj"));
+void stepAll(float dt, int substeps = 10) {
+    for (const auto &o : objects) {
+        for (int i = 0; i < substeps; ++i) {
+            TIME(o->step(dt / substeps));
+        }
+        clFinish(cl.cqueue());
+    }
 }
-*/
+
+void renderAll() {
+    for (const auto &o : objects) {
+        TIME(o->render());
+    }
+}
 
 
 int main() {
@@ -63,9 +69,16 @@ int main() {
     glEnable(GL_DEPTH_TEST);
     glClearDepth(1);
 
-    SDL_Event event;
+
     bool quit = false;
+    bool paused = false;
+
+
     while (!quit) {
+
+        float dt = 0.01;
+
+        SDL_Event event;
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
                 case SDL_QUIT:
@@ -76,8 +89,21 @@ int main() {
                         case SDL_SCANCODE_C:
                             clear();
                             break;
+                        case SDL_SCANCODE_P:
+                            paused = !paused;
+                            std::cout << (paused ? "PAUSED" : "RESUMED") << std::endl;
+                            break;
                         case SDL_SCANCODE_T:
-                            spawnTorus();
+                            spawnVolume("objects/torus.obj");
+                            break;
+                        case SDL_SCANCODE_G:
+                            spawnVolume("objects/sphere.obj");
+                            break;
+                        case SDL_SCANCODE_M:
+                            spawnVolume("objects/solid_smooth_monkey.obj");
+                            break;
+                        case SDL_SCANCODE_SPACE:
+                            stepAll(dt);
                             break;
                         default:
                             break;
@@ -85,7 +111,6 @@ int main() {
             }
         }
 
-        float dt = 0.01;
 
         const Uint8 *state = SDL_GetKeyboardState(NULL);
 
@@ -117,14 +142,11 @@ int main() {
 
         cam.look();
 
-        for (auto &o : objects) {
-            for (int i = 0; i < 10; ++i) {
-                TIME( o->step(dt / 10) ) ;
-            }
-            clFinish(cl.cqueue());
-            TIME ( o->render() ) ;
-            clFinish(cl.cqueue());
+        if (!paused) {
+            stepAll(dt);
         }
+
+        renderAll();
 
 
         SDL_RenderPresent(renderer);

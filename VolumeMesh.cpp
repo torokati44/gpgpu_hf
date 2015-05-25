@@ -58,7 +58,7 @@ VolumeMesh::VolumeMesh(const std::string &filename):
         float dz = positions[a].s[2] - positions[b].s[2];
 
         float dist = sqrtf(dx*dx + dy*dy + dz*dz);
-        float strength = 2000;
+        float strength = 4000;
 
         pairs[maxDegree * a + degrees[a]] = b;
         pairs[maxDegree * b + degrees[b]] = a;
