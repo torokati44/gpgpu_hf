@@ -31,20 +31,22 @@ void clear() {
     objects.clear();
 }
 
+void spawnTorus() {
+    auto t = new VolumeMesh("objects/torus.obj");
+    objects.push_back(t);
+}
+
+/*
 void reset() {
     clear();
 
     //objects.push_back(new SpringyObject("objects/gridcube_16.obj"));
-    objects.push_back(new VolumeMesh("objects/sphere.obj"));
+    objects.push_back(new VolumeMesh("objects/torus.obj"));
 }
-
+*/
 
 
 int main() {
-
-    reset();
-
-
     SDL_Init(SDL_INIT_VIDEO);
 
     SDL_Window *window;
@@ -70,10 +72,16 @@ int main() {
                     quit = true;
                     break;
                 case SDL_KEYDOWN:
-                    if (event.key.keysym.scancode == SDL_SCANCODE_R) {
-                        reset();
+                    switch (event.key.keysym.scancode) {
+                        case SDL_SCANCODE_C:
+                            clear();
+                            break;
+                        case SDL_SCANCODE_T:
+                            spawnTorus();
+                            break;
+                        default:
+                            break;
                     }
-                    break;
             }
         }
 
@@ -96,13 +104,13 @@ int main() {
         int x, y;
         int buttonstate = SDL_GetRelativeMouseState(&x, &y);
         if (buttonstate & 1) {
-            cam.right(x / 100.0 * dt);
-            cam.down(y / 100.0 * dt);
+            cam.right(x / 100.0f * dt);
+            cam.down(y / 100.0f * dt);
         }
 
         if (buttonstate & 4) {
-            cam.move_left(x / 100.0 * dt);
-            cam.move_up(y / 100.0 * dt);
+            cam.move_left(x / 10.0f * dt);
+            cam.move_up(y / 10.0f * dt);
         }
 
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
@@ -113,7 +121,9 @@ int main() {
             for (int i = 0; i < 10; ++i) {
                 TIME( o->step(dt / 10) ) ;
             }
+            clFinish(cl.cqueue());
             TIME ( o->render() ) ;
+            clFinish(cl.cqueue());
         }
 
 

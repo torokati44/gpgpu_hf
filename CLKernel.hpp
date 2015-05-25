@@ -33,8 +33,19 @@ public:
 
     void execute(size_t size, paramTypes... params) {
         //std::cout << "executing " << name << std::endl;
+        cl_event ev;
         setParam(0, params...);
-        clEnqueueNDRangeKernel(CLWrapper::instance->cqueue(),kernel, 1, NULL, &size, NULL, 0, NULL, NULL);
+        int result = clEnqueueNDRangeKernel(CLWrapper::instance->cqueue(), kernel, 1, NULL, &size, NULL, 0, NULL, &ev);
+
+        if(result != CL_SUCCESS)
+            std::cerr << CLWrapper::getErrorString(result) << std::endl;
+        else {
+            clWaitForEvents(1, &ev);
+        }
+    }
+
+    ~CLKernel() {
+        clReleaseKernel(kernel);
     }
 };
 

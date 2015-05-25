@@ -24,7 +24,7 @@ class SpringyObject : public AbstractObject {
     CLBuffer<cl_int> pairBuffer;
     CLBuffer<cl_float2> pairParamBuffer;
 
-    CLKernel<int, cl_mem, cl_mem, cl_mem, cl_mem, cl_mem> calcForcesKernel;
+    CLKernel<int, cl_mem, cl_mem, cl_mem, cl_mem, cl_mem, cl_mem> calcForcesKernel;
     CLKernel<float, cl_mem, cl_mem, cl_mem, cl_mem> integrate1EulerKernel;
     CLKernel<float, cl_mem, cl_mem, cl_mem> integrate2EulerKernel;
 

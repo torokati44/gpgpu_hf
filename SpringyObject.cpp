@@ -74,7 +74,7 @@ SpringyObject::SpringyObject(const std::string &filename):
 }
 
 void SpringyObject::step(float dt) {
-    calcForcesKernel.execute(obj.points.size(), maxDegree, positionBuffer, degreeBuffer, pairBuffer, pairParamBuffer, forceBuffer);
+    calcForcesKernel.execute(obj.points.size(), maxDegree, positionBuffer, inverseMassBuffer, degreeBuffer, pairBuffer, pairParamBuffer, forceBuffer);
 
     integrate1EulerKernel.execute(obj.points.size(), dt, inverseMassBuffer, velocityBuffer, forceBuffer, velocityBuffer);
 

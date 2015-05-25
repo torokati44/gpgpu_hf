@@ -58,7 +58,7 @@ VolumeMesh::VolumeMesh(const std::string &filename):
         float dz = positions[a].s[2] - positions[b].s[2];
 
         float dist = sqrtf(dx*dx + dy*dy + dz*dz);
-        float strength = 5000;
+        float strength = 2000;
 
         pairs[maxDegree * a + degrees[a]] = b;
         pairs[maxDegree * b + degrees[b]] = a;
@@ -73,7 +73,7 @@ VolumeMesh::VolumeMesh(const std::string &filename):
         ++degrees[b];
     }
 
-    for (int i = 0; i < obj.faces.size(); ++i) {
+    for (size_t i = 0; i < obj.faces.size(); ++i) {
         int a = obj.faces[i].s[0];
         int b = obj.faces[i].s[1];
         int c = obj.faces[i].s[2];
@@ -121,7 +121,7 @@ void VolumeMesh::step(float dt) {
 
     std::cout << "volume is " << volumeNow << " now, but was " << initVolume << std::endl;
 
-    calcForcesKernel.execute(obj.points.size(), maxDegree, positionBuffer, degreeBuffer, pairBuffer, pairParamBuffer, forceBuffer);
+    calcForcesKernel.execute(obj.points.size(), maxDegree, positionBuffer, inverseMassBuffer, degreeBuffer, pairBuffer, pairParamBuffer, forceBuffer);
 
     applyPressureKernel.execute(obj.points.size(), initVolume - volumeNow, maxCornered, positionBuffer, corneredBuffer, otherCornerBuffer, forceBuffer);
 

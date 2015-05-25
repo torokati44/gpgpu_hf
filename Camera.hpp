@@ -8,7 +8,7 @@
 class Camera {
 
     float x = 0, y = 0, z = 0;
-    float r = 10, theta = 0, phi = 0;
+    float r = 5, theta = 0, phi = 0;
 
 public:
     void look();

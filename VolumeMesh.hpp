@@ -34,7 +34,7 @@ class VolumeMesh : public AbstractObject {
     CLBuffer<cl_float> volumeBuffer;
 
 
-    CLKernel<int, cl_mem, cl_mem, cl_mem, cl_mem, cl_mem> calcForcesKernel;
+    CLKernel<int, cl_mem, cl_mem, cl_mem, cl_mem, cl_mem, cl_mem> calcForcesKernel;
     CLKernel<cl_mem, cl_mem, cl_mem> calcVolumesKernel;
     CLKernel<float, int, cl_mem, cl_mem, cl_mem, cl_mem> applyPressureKernel;
     CLKernel<float, cl_mem, cl_mem, cl_mem, cl_mem> integrate1EulerKernel;

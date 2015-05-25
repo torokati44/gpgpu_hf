@@ -1,41 +1,10 @@
 
-__constant float4 gravity = (float4)(0, 0, -1, 0);
-
-/*
-__kernel void calcForces(int numPoints, int numEdges,
-        __global float4 *positionBuffer,
-        __global float4 *forceBuffer,
-        __global int2 *edgeBuffer,
-        __global float2 *springParams)
-{
-        int point = get_global_id(0);
-        forceBuffer[point] = gravity;
-        for (int i = 0; i < numEdges; ++i) {
-                int other = -1;
-                if (edgeBuffer[i].x == point) {
-                    other = edgeBuffer[i].y;
-                }
-                if (edgeBuffer[i].y == point) {
-                    other = edgeBuffer[i].x;
-                }
-
-                if (other >= 0) {
-                    float dist = distance(positionBuffer[other], positionBuffer[point]);
-
-                    if (dist < 1e-5f) continue;
-
-                    float4 to_other = (positionBuffer[other] - positionBuffer[point]) / dist;
-
-                    forceBuffer[point] += to_other * springParams[i].y * (dist - springParams[i].x);
-                }
-        }
-}
-*/
-
+__constant float4 gravity = (float4)(0, 0, -10, 0);
 
 
 __kernel void calcForces(int maxDegree,
         __global float4 *positionBuffer,
+        __global float *inverseMassBuffer,
         __global int *degreeBuffer,
         __global int *pairBuffer,
         __global float2 *pairParamBuffer,
@@ -44,8 +13,10 @@ __kernel void calcForces(int maxDegree,
         int point = get_global_id(0);
         int first = point * maxDegree;
 
-        forceBuffer[point] = gravity;
-
+        float invMass = inverseMassBuffer[point];
+        if (invMass > 1e-5f) {
+            forceBuffer[point] = gravity / invMass;
+        }
         for (int i = 0; i < degreeBuffer[point]; ++i) {
                 int other = pairBuffer[first + i];
 
@@ -78,10 +49,10 @@ __kernel void integrate2Euler(
 
     position_out[id] = position_in[id] + dt * velocity_in[id];
 
-    if ((position_out[id].z <= 0.0f) && (velocity_in[id].z < 0.0f)) {
-        position_out[id].z = 0.0f;
+    if ((position_out[id].z < position_out[id].y * 0.3f)) {
+        position_out[id].z = position_out[id].y * 0.3f;
         velocity_in[id].z = 0.0f;
-        velocity_in[id] *= 0.9f;
+        velocity_in[id] *= 0.5f;
     }
     velocity_in[id] *= 0.999f;
 }
@@ -119,7 +90,7 @@ __kernel void applyPressure(float pressureDiff, int maxCornered,
         float4 c = positionBuffer[other2];
 
         float4 cp = cross(b-a, c-a);
-        forceBuffer[point] += cp * pressureDiff * 10000;
+        forceBuffer[point] += cp * pressureDiff * 1000;
         normal += normalize(cp);
     }
 

@@ -60,6 +60,8 @@ public:
 
     void printOpenCLInfo();
 
+    static const char *getErrorString(cl_int error);
+
 private:
     cl_device_type _device_type;
     cl_platform_id _platform;

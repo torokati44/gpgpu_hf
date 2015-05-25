@@ -53,19 +53,20 @@ ObjLoader::ObjLoader(std::string filename) {
                 face.s[2] = c - 1;
                 face.s[3] = 0;
                 faces.push_back(face);
+            } else if (type == "s") {
+                // nothing...
             } else {
                 std::cerr << "Unknown line type: '" << type << "'";
             }
         }
     }
-
     std::cout << "Loaded " <<
             points.size() << " points, " <<
             edges.size() << " edges and " <<
             faces.size() << " faces " <<
             "from " << filename << std::endl;
 
-    connect_neighbors(0.01, 0.25);
+    connect_neighbors(0.01, 0.32);
 }
 
 void ObjLoader::connect_neighbors(float mindist, float maxdist) {
