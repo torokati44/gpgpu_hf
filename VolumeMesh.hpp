@@ -23,6 +23,8 @@ class VolumeMesh : public AbstractObject {
     CLBuffer<cl_float> inverseMassBuffer;
     CLBuffer<cl_float4> forceBuffer;
 
+    CLBuffer<cl_float4> normalBuffer;
+
     CLBuffer<cl_int> degreeBuffer;
 
     CLBuffer<cl_int> pairBuffer;
@@ -37,6 +39,7 @@ class VolumeMesh : public AbstractObject {
     CLKernel<int, cl_mem, cl_mem, cl_mem, cl_mem, cl_mem, cl_mem> calcForcesKernel;
     CLKernel<cl_mem, cl_mem, cl_mem> calcVolumesKernel;
     CLKernel<float, int, cl_mem, cl_mem, cl_mem, cl_mem> applyPressureKernel;
+    CLKernel<int, cl_mem, cl_mem, cl_mem, cl_mem> calcNormalsKernel;
     CLKernel<float, cl_mem, cl_mem, cl_mem, cl_mem> integrate1EulerKernel;
     CLKernel<float, cl_mem, cl_mem, cl_mem> integrate2EulerKernel;
 
@@ -44,10 +47,11 @@ public:
     VolumeMesh(const std::string &filename);
 
     float getVolume();
-
     void step(float dt);
-
     void render();
+
+    void inflate(float dt) override;
+    void deflate(float dt) override;
 };
 
 

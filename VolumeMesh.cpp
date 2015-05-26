@@ -9,6 +9,7 @@ VolumeMesh::VolumeMesh(const std::string &filename):
         velocityBuffer{obj.points.size()},
         inverseMassBuffer{obj.points.size()},
         forceBuffer{obj.points.size()},
+        normalBuffer{obj.points.size()},
         degreeBuffer{obj.points.size()},
         pairBuffer{obj.points.size() * maxDegree},
         pairParamBuffer{obj.points.size() * maxDegree},
@@ -19,6 +20,7 @@ VolumeMesh::VolumeMesh(const std::string &filename):
         calcForcesKernel{"calcForces"},
         calcVolumesKernel{"calcVolumes"},
         applyPressureKernel{"applyPressure"},
+        calcNormalsKernel{"calcNormals"},
         integrate1EulerKernel{"integrate1Euler"},
         integrate2EulerKernel{"integrate2Euler"}
 {
@@ -119,7 +121,7 @@ VolumeMesh::VolumeMesh(const std::string &filename):
 void VolumeMesh::step(float dt) {
     float volumeNow = getVolume();
 
-    std::cout << "volume is " << volumeNow << " now, but was " << initVolume << std::endl;
+    //std::cout << "volume is " << volumeNow << " now, but was " << initVolume << std::endl;
 
     calcForcesKernel.execute(obj.points.size(), maxDegree, positionBuffer, inverseMassBuffer, degreeBuffer, pairBuffer, pairParamBuffer, forceBuffer);
 
@@ -128,6 +130,8 @@ void VolumeMesh::step(float dt) {
     integrate1EulerKernel.execute(obj.points.size(), dt, inverseMassBuffer, velocityBuffer, forceBuffer, velocityBuffer);
 
     integrate2EulerKernel.execute(obj.points.size(), dt, positionBuffer, velocityBuffer, positionBuffer);
+
+    calcNormalsKernel.execute(obj.points.size(), maxCornered, positionBuffer, corneredBuffer, otherCornerBuffer, normalBuffer);
 }
 
 float VolumeMesh::getVolume() {
@@ -148,6 +152,7 @@ float VolumeMesh::getVolume() {
 
 void VolumeMesh::render() {
     auto positions = positionBuffer.map();
+    auto normals = normalBuffer.map();
 
     glPointSize(3);
 
@@ -180,15 +185,30 @@ void VolumeMesh::render() {
     }
     glEnd();
 
+    glEnable(GL_LIGHTING);
     glBegin(GL_TRIANGLES);
     glColor3f(0.2, 0.4, 0.8);
     for (auto &f : obj.faces) {
+        glNormal3fv(normals[f.s[0]].s);
         glVertex3fv(positions[f.s[0]].s);
+
+        glNormal3fv(normals[f.s[1]].s);
         glVertex3fv(positions[f.s[1]].s);
+
+        glNormal3fv(normals[f.s[2]].s);
         glVertex3fv(positions[f.s[2]].s);
     }
     glEnd();
-
+    glDisable(GL_LIGHTING);
 
     positionBuffer.unmap();
+    normalBuffer.unmap();
+}
+
+void VolumeMesh::inflate(float dt) {
+    initVolume += dt * 10;
+}
+
+void VolumeMesh::deflate(float dt) {
+    initVolume -= dt * 10l;
 }

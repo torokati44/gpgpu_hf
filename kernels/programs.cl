@@ -49,8 +49,8 @@ __kernel void integrate2Euler(
 
     position_out[id] = position_in[id] + dt * velocity_in[id];
 
-    if ((position_out[id].z < position_out[id].y * 0.3f)) {
-        position_out[id].z = position_out[id].y * 0.3f;
+    if ((position_out[id].z < -position_out[id].x * 0.3f)) {
+        position_out[id].z = -position_out[id].x * 0.3f;
         velocity_in[id].z = 0.0f;
         velocity_in[id] *= 0.5f;
     }
@@ -80,7 +80,6 @@ __kernel void applyPressure(float pressureDiff, int maxCornered,
 ) {
     int point = get_global_id(0);
 
-    float4 normal = (float4)(0);
     for (int i = 0; i < corneredBuffer[point]; ++i) {
         int other1 = otherCornerBuffer[maxCornered * point + i].x;
         int other2 = otherCornerBuffer[maxCornered * point + i].y;
@@ -91,9 +90,30 @@ __kernel void applyPressure(float pressureDiff, int maxCornered,
 
         float4 cp = cross(b-a, c-a);
         forceBuffer[point] += cp * pressureDiff * 20000;
+    }
+}
+
+__kernel void calcNormals(int maxCornered,
+                            __global float4 *positionBuffer,
+__global int *corneredBuffer,
+        __global int2 *otherCornerBuffer,
+        __global float4 *normalBuffer
+) {
+    int point = get_global_id(0);
+
+    float4 normal = (float4)(0);
+
+    for (int i = 0; i < corneredBuffer[point]; ++i) {
+        int other1 = otherCornerBuffer[maxCornered * point + i].x;
+        int other2 = otherCornerBuffer[maxCornered * point + i].y;
+
+        float4 a = positionBuffer[point];
+        float4 b = positionBuffer[other1];
+        float4 c = positionBuffer[other2];
+
+        float4 cp = cross(b-a, c-a);
         normal += normalize(cp);
     }
 
-    //forceBuffer[point] += normal * 1000;
-
+    normalBuffer[point] = normalize(normal);
 }

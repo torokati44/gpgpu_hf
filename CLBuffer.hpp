@@ -30,7 +30,7 @@ public:
 
     T *map() {
         ++mapcount;
-        std::cout << "mapping, count = " << mapcount << std::endl;
+        //std::cout << "mapping, count = " << mapcount << std::endl;
 
         if (!mapped) {
             cl_event ev;
@@ -48,7 +48,7 @@ public:
 
     void unmap() {
         --mapcount;
-        std::cout << "unmapping, count = " << mapcount << std::endl;
+        //std::cout << "unmapping, count = " << mapcount << std::endl;
         cl_event ev;
         if (mapped) {
             clEnqueueUnmapMemObject(CLWrapper::instance->cqueue(), mem, mapped, 0, NULL, &ev);
@@ -62,7 +62,7 @@ public:
     }
 
     ~CLBuffer() {
-        std::cout << "mapcount = " << mapcount << std::endl;
+        //std::cout << "mapcount = " << mapcount << std::endl;
         if (mapped) {
             unmap();
         }

@@ -183,10 +183,10 @@ void ObjLoader::connect_opposites() {
 void ObjLoader::connect_neighbors() {
     std::vector<cl_int2> new_edges;
 
-    for (int p = 0; p < points.size(); ++p) {
-        for (int e1 = 0; e1 < edges.size(); ++e1) {
+    for (int p = 0; p < (int)points.size(); ++p) {
+        for (int e1 = 0; e1 < (int)edges.size(); ++e1) {
             if (edges[e1].s[0] == p || edges[e1].s[1] == p) {
-                for (int e2 = 0; e2 < edges.size(); ++e2) {
+                for (int e2 = 0; e2 < (int)edges.size(); ++e2) {
 
                     if (edges[e2].s[0] == edges[e1].s[1]) {
                         cl_int2 new_edge;

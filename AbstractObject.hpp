@@ -10,6 +10,11 @@ class AbstractObject {
 public:
     virtual void step(float dt) = 0;
     virtual void render() = 0;
+
+    //these only make sense for volume objects
+    virtual void inflate(float dt) {};
+    virtual void deflate(float dt) {};
+
     virtual ~AbstractObject() {};
 };
 
