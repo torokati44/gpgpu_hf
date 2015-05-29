@@ -39,6 +39,7 @@ public:
                                               length * sizeof(T),
                                               0, NULL, &ev, NULL);
             clWaitForEvents(1, &ev);
+            clReleaseEvent(ev);
         } else {
             std::cerr << "MAPPING AGAIN!" << std::endl;
         }
@@ -53,6 +54,7 @@ public:
         if (mapped) {
             clEnqueueUnmapMemObject(CLWrapper::instance->cqueue(), mem, mapped, 0, NULL, &ev);
             clWaitForEvents(1, &ev);
+            clReleaseEvent(ev);
         }
         mapped = 0;
     }

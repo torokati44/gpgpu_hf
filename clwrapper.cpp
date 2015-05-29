@@ -80,7 +80,7 @@ void CLWrapper::createContext() {
 }
 
 void CLWrapper::createCommandQueue() {
-    _cqueue = clCreateCommandQueue(_context, _device_id, CL_QUEUE_PROFILING_ENABLE, NULL);
+    _cqueue = clCreateCommandQueue(_context, _device_id, 0, NULL);
     if (!_cqueue) {
         std::cerr << "Command queue creation failed!" << std::endl;
     }

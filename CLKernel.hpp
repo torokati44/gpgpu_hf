@@ -41,6 +41,7 @@ public:
             std::cerr << CLWrapper::getErrorString(result) << std::endl;
         else {
             clWaitForEvents(1, &ev);
+            clReleaseEvent(ev);
         }
     }
 
